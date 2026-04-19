@@ -1,0 +1,22 @@
+# Environment variables
+.env
+*.env
+backend/.env
+
+# Python
+__pycache__/
+*.pyc
+backend/venv/
+
+# Database
+*.db
+backend/ai_job_agent.db
+
+# Node
+node_modules/
+frontend/.next/
+frontend/out/
+
+# OS
+.DS_Store
+Thumbs.db
