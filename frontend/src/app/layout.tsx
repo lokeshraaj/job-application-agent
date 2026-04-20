@@ -1,12 +1,26 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
+import Link from 'next/link';
+import { Toaster } from 'react-hot-toast';
+import Sidebar from '@/components/Sidebar';
+import { Analytics } from "@vercel/analytics/react";
+import { PostHogProvider } from "@/providers/PostHogProvider";
+// import { Toaster } from 'react-hot-toast';
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], weight: ['400', '500', '600', '700'] });
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
-  title: "AutoApply AI - Agentic Job Outreach",
-  description: "An autonomous agent that finds job openings and sends personalized cold emails using Hindsight memory.",
+  title: "AI Job Agent",
+  description: "AI-Powered Career & Resume Platform",
 };
 
 export default function RootLayout({
@@ -15,12 +29,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} min-h-screen bg-background text-foreground antialiased selection:bg-primary selection:text-white`}>
-        <div className="fixed inset-0 -z-10 h-full w-full bg-[#0f172a]">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_200%_100%_at_top,#1e293b,transparent)]"></div>
-        </div>
-        {children}
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
+    >
+      <body className="min-h-full flex flex-col md:flex-row text-gray-100 selection:bg-blue-500/30">
+        
+        {/* POSTHOG TELEMETRY WRAPPER */}
+        <PostHogProvider>
+            {/* SIDEBAR NAVIGATION */}
+            <Sidebar />
+
+            {/* MAIN CONTENT AREA */}
+            <main className="flex-1 p-6 md:p-10 hide-scrollbar overflow-x-hidden relative">
+              <Toaster position="bottom-right" toastOptions={{ style: { background: '#171717', color: '#fff', border: '1px solid #333' } }} />
+              {children}
+            </main>
+        </PostHogProvider>
+
+        {/* VERCEL END-OF-BODY ANALYTICS */}
+        <Analytics />
       </body>
     </html>
   );
