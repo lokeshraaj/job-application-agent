@@ -4,13 +4,14 @@
 
 ### Your AI-Powered Career Autopilot
 
-An intelligent full-stack platform that automates your job search — from resume analysis to smart applications and AI-crafted outreach pitches. Built with **Next.js 16**, **FastAPI**, and **Groq (Llama 3.3 70B)**.
+An intelligent full-stack platform that automates your job search — from resume analysis to smart applications and AI-crafted outreach pitches. Built with **Next.js 16**, **FastAPI**, **Groq (Llama 3.3 70B)**, and **Hindsight** for persistent agent memory.
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Groq](https://img.shields.io/badge/Groq-Llama%203.3-F55036?style=for-the-badge&logo=meta&logoColor=white)](https://groq.com/)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://typescriptlang.org/)
+[![Hindsight](https://img.shields.io/badge/Hindsight-Memory%20Engine-8B5CF6?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPjxwYXRoIGQ9Ik0xMiAyYTEwIDEwIDAgMSAwIDAgMjAgMTAgMTAgMCAwIDAgMC0yMHoiLz48cGF0aCBkPSJNMTIgNnY2bDQgMiIvPjwvc3ZnPg==&logoColor=white)](https://hindsight.vectorize.io/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com/)
 
 ---
@@ -28,6 +29,7 @@ An intelligent full-stack platform that automates your job search — from resum
 | 📊 **Kanban Tracker** | Track all applications across stages — Applied, Interviewing, Offer, Rejected |
 | 🔐 **Authentication** | User sign-up and login with hashed password storage |
 | 📈 **Analytics Dashboard** | Overview of resumes, ATS scores, active applications, and recent activity feed |
+| 🔮 **Hindsight Memory** | Persistent agent memory that remembers past interactions, prevents duplicate outreach, and learns from outcomes |
 
 ---
 
@@ -180,7 +182,7 @@ docker run -p 8000:8000 \
 
 ## 🧠 AI Pipeline
 
-The AI service uses **Groq's Llama 3.3 70B Versatile** model for three core tasks:
+The AI service uses **Groq's Llama 3.3 70B Versatile** model for three core tasks, backed by **Hindsight** for persistent memory:
 
 ```mermaid
 graph LR
@@ -194,11 +196,52 @@ graph LR
 
     G --> H[Pitch Generator]
     H --> I[Cold Email<br/>< 150 words]
+
+    J[🔮 Hindsight Memory] --> F
+    J --> H
+    I --> J
 ```
 
 1. **Resume Analysis** — Extracts skills, experience, and generates ATS scores with format, keyword, and impact sub-scores
 2. **Match Scoring** — Compares resume content against job descriptions to calculate a fit percentage
 3. **Pitch Generation** — Crafts personalized cold emails blending candidate strengths with job requirements
+4. **Memory Layer (Hindsight)** — Retains outcomes and interactions so the agent avoids redundant outreach and improves over time
+
+---
+
+## 🔮 Hindsight — Agent Memory
+
+[Hindsight](https://hindsight.vectorize.io/) by **Vectorize.io** is the open-source memory engine that gives the AI Job Agent persistent, long-term recall. Instead of starting from scratch every session, the agent:
+
+- **Remembers** which companies and HR contacts have already been reached out to
+- **Learns** from past application outcomes (accepted, rejected, ghosted) to refine future strategies
+- **Prevents** duplicate or redundant outreach to the same job listing or recruiter
+- **Retains** user preferences, resume versions, and interaction history across sessions
+
+### How It Works
+
+| Operation | Purpose |
+|---|---|
+| `retain()` | Store new interactions — applications sent, pitches generated, status changes |
+| `recall()` | Retrieve relevant memories before taking action (e.g., "Have I contacted this company?") |
+| `reflect()` | Reason over past data to generate insights (e.g., "Which industries respond best?") |
+
+> 💡 Hindsight transforms the agent from a stateless tool into one that genuinely **learns from experience** — the core principle behind agentic AI.
+
+### Setup
+
+```bash
+pip install hindsight-api
+```
+
+Add your Hindsight credentials to the backend `.env`:
+
+```env
+HINDSIGHT_API_KEY="your_hindsight_api_key"
+HINDSIGHT_BASE_URL="https://api.hindsight.vectorize.io"
+```
+
+> 📖 Full documentation: [hindsight.vectorize.io](https://hindsight.vectorize.io/)
 
 ---
 
@@ -209,6 +252,7 @@ graph LR
 | **Frontend** | Next.js 16, React 19, TypeScript, Tailwind CSS 4 |
 | **Backend** | FastAPI, SQLAlchemy, Pydantic |
 | **AI/LLM** | Groq API, Llama 3.3 70B Versatile |
+| **Agent Memory** | [Hindsight](https://hindsight.vectorize.io/) by Vectorize.io |
 | **Database** | SQLite (dev) / PostgreSQL (prod) |
 | **File Parsing** | pdfplumber, python-docx |
 | **Auth** | passlib + bcrypt |
