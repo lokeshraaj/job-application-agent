@@ -289,11 +289,18 @@ def generate_tailored_resume(
     ]
 
     try:
+        print(f"[AI SERVICE] Calling Groq model={MODEL_HEAVY} for tailored resume...")
+        print(f"[AI SERVICE] System prompt length: {len(system_prompt)}, user content length: {len(messages[1]['content'])}")
         response = client.chat.completions.create(
             model=MODEL_HEAVY,
             messages=messages,
         )
-        return response.choices[0].message.content
+        result = response.choices[0].message.content
+        print(f"[AI SERVICE] Groq returned tailored resume: {len(result) if result else 0} chars")
+        return result
     except Exception as e:
+        print(f"[AI SERVICE] GROQ ERROR in generate_tailored_resume: {type(e).__name__}: {e}")
+        import traceback
+        traceback.print_exc()
         logger.warning("Groq API Error in generate_tailored_resume: %s", e)
         return "We encountered an error tailoring the resume. Please try again."

@@ -150,26 +150,44 @@ async def generate_application_pitch(
         full_context += f"AGENT REFLECTION:\n{reflection}\n\n"
 
     # Step 3: Generate the pitch via Groq with memory context
+    print(f"[PITCH DEBUG] resume.raw_text length: {len(resume.raw_text or '')}")
+    print(f"[PITCH DEBUG] job.description length: {len(job.description or '')}")
+
     pitch_text = generate_pitch(
         resume.raw_text or "",
         job.description or "",
         memory_context=full_context if full_context else None,
     )
+    print(f"[PITCH DEBUG] pitch_text generated: {len(pitch_text)} chars")
 
     # Step 4: Generate tailored resume via Groq with same memory context
-    tailored_resume_md = generate_tailored_resume(
-        resume.raw_text or "",
-        job.description or "",
-        memory_context=full_context if full_context else None,
-    )
+    print(f"[RESUME DEBUG] Calling generate_tailored_resume...")
+    try:
+        tailored_resume_md = generate_tailored_resume(
+            resume.raw_text or "",
+            job.description or "",
+            memory_context=full_context if full_context else None,
+        )
+        print(f"[RESUME DEBUG] tailored_resume_md result: type={type(tailored_resume_md)}, len={len(tailored_resume_md) if tailored_resume_md else 0}")
+        print(f"[RESUME DEBUG] First 200 chars: {repr(tailored_resume_md[:200]) if tailored_resume_md else 'NONE'}")
+    except Exception as e:
+        print(f"[RESUME DEBUG] EXCEPTION in generate_tailored_resume: {type(e).__name__}: {e}")
+        import traceback
+        traceback.print_exc()
+        tailored_resume_md = None
 
     # Step 5: Store both outputs
     app.cold_email = pitch_text
     app.cover_letter = pitch_text  # backward compat
     app.tailored_resume = tailored_resume_md
     app.pitch_version = (app.pitch_version or 0) + 1
+
+    print(f"[RESUME DEBUG] app.tailored_resume set to: {type(app.tailored_resume)}, len={len(app.tailored_resume) if app.tailored_resume else 0}")
+
     db.commit()
     db.refresh(app)
+
+    print(f"[RESUME DEBUG] After commit+refresh: app.tailored_resume = {type(app.tailored_resume)}, len={len(app.tailored_resume) if app.tailored_resume else 0}")
 
     return app
 

@@ -76,7 +76,8 @@ export default function TrackerPage() {
   };
 
   const handleDraftPitch = async (app: ApplicationResponse) => {
-    if (app.cold_email || app.cover_letter) {
+    // If pitch exists AND tailored resume exists, just show the modal
+    if ((app.cold_email || app.cover_letter) && app.tailored_resume) {
       setPitchModal(app);
       setEditText(app.edited_email || app.cold_email || app.cover_letter || "");
       setResumeEditText(app.edited_resume || app.tailored_resume || "");
@@ -85,6 +86,7 @@ export default function TrackerPage() {
       setActiveTab("pitch");
       return;
     }
+    // Otherwise: generate (or regenerate) both pitch + resume
     toast.loading("Groq + Hindsight generating pitch & resume...", { id: `pitch-${app.id}` });
     try {
       const updated = await generatePitch(app.id);
@@ -97,6 +99,21 @@ export default function TrackerPage() {
       setActiveTab("pitch");
       loadAll();
     } catch { toast.error("Generation failed.", { id: `pitch-${app.id}` }); }
+  };
+
+  const handleRegenerate = async () => {
+    if (!pitchModal) return;
+    toast.loading("Regenerating pitch & resume with latest memory...", { id: "regen" });
+    try {
+      const updated = await generatePitch(pitchModal.id);
+      toast.success("Regenerated with latest Hindsight memory!", { id: "regen" });
+      setPitchModal(updated);
+      setEditText(updated.cold_email || updated.cover_letter || "");
+      setResumeEditText(updated.edited_resume || updated.tailored_resume || "");
+      setIsEditing(false);
+      setIsEditingResume(false);
+      loadAll();
+    } catch { toast.error("Regeneration failed.", { id: "regen" }); }
   };
 
   const handleSavePitchEdit = async () => {
@@ -307,7 +324,12 @@ export default function TrackerPage() {
                     </span>
                   )}
                 </h2>
-                <button onClick={() => { setPitchModal(null); setIsEditing(false); setIsEditingResume(false); }} className="text-gray-400 hover:text-white transition-colors"><X size={20} /></button>
+                <div className="flex items-center gap-2">
+                  <button onClick={handleRegenerate} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-400 hover:text-white bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 rounded-lg transition-all" title="Regenerate with latest memory">
+                    <RefreshCw size={12} /> Regenerate
+                  </button>
+                  <button onClick={() => { setPitchModal(null); setIsEditing(false); setIsEditingResume(false); }} className="text-gray-400 hover:text-white transition-colors"><X size={20} /></button>
+                </div>
               </div>
               {/* Tab bar */}
               <div className="flex px-4">
