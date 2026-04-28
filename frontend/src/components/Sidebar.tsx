@@ -1,16 +1,35 @@
 "use client";
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { LayoutDashboard, FileText, Briefcase, Activity, Brain, Sparkles } from "lucide-react";
+import { usePathname, useRouter } from 'next/navigation';
+import { LayoutDashboard, FileText, Briefcase, Activity, Brain, Sparkles, LogOut } from "lucide-react";
+import { auth } from "@/lib/firebase";
+import { signOut } from "firebase/auth";
+import toast from "react-hot-toast";
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
 
   // Hide sidebar on auth routes
   if (pathname === '/login' || pathname === '/signup') {
     return null;
   }
+
+  const handleLogout = async () => {
+    try {
+      // Sign out from Firebase (if configured)
+      if (auth) {
+        await signOut(auth);
+      }
+      toast.success("Signed out successfully.");
+      router.push("/login");
+    } catch (err) {
+      console.error("Logout error:", err);
+      // Redirect anyway
+      router.push("/login");
+    }
+  };
 
   const navItems = [
     { href: "/dashboard",       label: "Dashboard",       icon: LayoutDashboard, color: "text-blue-400",   hoverColor: "group-hover:text-blue-300" },
@@ -64,8 +83,15 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Footer */}
-      <div className="mt-auto pt-6 border-t border-white/5">
+      {/* Footer with Logout */}
+      <div className="mt-auto pt-6 border-t border-white/5 space-y-3">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all group hover:bg-red-500/10 text-gray-400 hover:text-red-400"
+        >
+          <LogOut size={18} className="group-hover:text-red-400 transition-colors" />
+          <span className="font-medium text-sm">Sign Out</span>
+        </button>
         <div className="flex items-center gap-2 text-[11px] text-gray-500">
           <Brain size={12} className="text-amber-500/60" />
           <span>Powered by Vectorize Hindsight</span>
